@@ -4,7 +4,7 @@ from flask_jsonrpc import JSONRPC
 from typing import Dict, List
 
 app = Flask(__name__)
-jsonrpc = JSONRPC(app, '/api', enable_web_browsable_api=False)
+jsonrpc = JSONRPC(app, '/', enable_web_browsable_api=False)
 
 
 @jsonrpc.method('process')
@@ -14,4 +14,4 @@ def process_text(text: str) -> List[Dict]:
 
 
 if __name__ == '__main__':
-    app.run()
+    app.run(port=5001)
