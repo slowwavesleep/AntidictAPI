@@ -36,8 +36,8 @@ def is_word(token: str, min_len: int, max_len: int, s_words: Set[str]) -> bool:
     t = token.lower()
     min_max = str(min_len) + ',' + str(max_len)
     return regex.fullmatch(r"[а-яё\-]{" + min_max + "}", t) and (t not in s_words)
-  
-  
+
+
 def predict(text: str) -> Dict[str, Union[List[Dict[str, Any]], dict]]:
     tokens = [t.text for t in tokenize(text)]
     cache = {t: {"loanword": 0, "obscene": 0, "expressive": 0}
