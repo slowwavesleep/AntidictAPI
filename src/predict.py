@@ -22,10 +22,10 @@ model = gensim.models.KeyedVectors.load("models/fasttext/araneum_none_fasttextcb
 
 def statistics(analysis: List[dict]) -> dict:
     total = len(analysis)
-    loanword = len([t for t in analysis if t["is_loanword"]])
-    obscene = len([t for t in analysis if t["is_obscene"]])
+    loanword = len([t for t in analysis if t["loanword"]])
+    obscene = len([t for t in analysis if t["obscene"]])
     expressive = len([t for t in analysis
-                      if (t["is_obscene"] or t["is_expressive"])])
+                      if (t["obscene"] or t["expressive"])])
     stats = {"loanword_ratio": loanword,
              "obscene_ratio": obscene,
              "expressive_ratio": expressive}
@@ -40,17 +40,18 @@ def is_word(token: str, min_len: int, max_len: int, s_words: Set[str]) -> bool:
 
 def predict(text: str) -> Dict[str, Union[List[Dict[str, Any]], dict]]:
     tokens = [t.text for t in tokenize(text)]
-    cache = {t: {"is_loanword": 0, "is_obscene": 0, "is_expressive": 0}
+    cache = {t: {"loanword": 0, "obscene": 0, "expressive": 0}
              for t in set(t.lower() for t in tokens)}
     for t in cache:
         if is_word(t, min_len=3, max_len=30, s_words=stops):
             cache[t]["emb"] = model[t]
-            cache[t]["is_loanword"] = loanword_clf.predict([cache[t]["emb"]]).item()
-            cache[t]["is_obscene"] = obscene_clf.predict([cache[t]["emb"]]).item()
-            cache[t]["is_expressive"] = expressive_clf.predict([cache[t]["emb"]]).item()
-    analysis = [{'word': t,
-                 "is_loanword": cache[t.lower()]["is_loanword"],
-                 "is_obscene": cache[t.lower()]["is_obscene"],
-                 "is_expressive": cache[t.lower()]["is_expressive"]
+            cache[t]["loanword"] = loanword_clf.predict([cache[t]["emb"]]).item()
+            cache[t]["obscene"] = obscene_clf.predict([cache[t]["emb"]]).item()
+            cache[t]["expressive"] = expressive_clf.predict([cache[t]["emb"]]).item()
+    analysis = [{"word": t,
+                 "loanword": cache[t.lower()]["loanword"],
+                 "obscene": cache[t.lower()]["obscene"],
+                 "expressive": cache[t.lower()]["expressive"]
                  } for t in tokens]
-    return {"analysis": analysis, "statistics": statistics(analysis)}
+    a = [{"word":d["word"], "categories": [k for k, v in d.items() if v and k != "word"]} for d in analysis]
+    return {"analysis": a, "statistics": statistics(analysis)}
