@@ -38,7 +38,7 @@ def is_word(token: str, min_len: int, max_len: int, s_words: Set[str]) -> bool:
     return regex.fullmatch(r"[а-яё\-]{" + min_max + "}", t) and (t not in s_words)
 
 
-def predict(text: str) -> Dict[str, Union[List[Dict[str, Any]], dict]]:
+def predict(text: str) -> List[Dict[str, Union[List[Dict[str, Any]], dict]]]:
     tokens = [t.text for t in tokenize(text)]
     cache = {t: {"loanword": 0, "obscene": 0, "expressive": 0}
              for t in set(t.lower() for t in tokens)}
@@ -54,4 +54,4 @@ def predict(text: str) -> Dict[str, Union[List[Dict[str, Any]], dict]]:
                  "expressive": cache[t.lower()]["expressive"]
                  } for t in tokens]
     a = [{"word":d["word"], "categories": [k for k, v in d.items() if v and k != "word"]} for d in analysis]
-    return {"analysis": a, "statistics": statistics(analysis)}
+    return [{"analysis": a, "statistics": statistics(analysis)}]
